@@ -1,16 +1,8 @@
 ---
-# This executes when the specified action in "maintenance"
-- name: Enter Maintenance Mode
-  vmware_maintenancemode:
-    hostname: "{{ vcenter_hostname }}"
-    username: "{{ vcenter_username }}"
-    password: "{{ vcenter_password }}"
-    esxi_hostname: "{{ inventory_hostname }}"
-    vsan: ensureObjectAccessibility
-    evacuate: yes
-    timeout: 3600
-    state: present
-  delegate_to: localhost
+# This executes when the specified action is "maintenance"
+- import_tasks: maintenancemode.yml
+  vars:
+    esx_maintenancemode: "present"
 
 # other tasks here
 ...

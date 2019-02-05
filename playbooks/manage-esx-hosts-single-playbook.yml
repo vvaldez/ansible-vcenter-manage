@@ -37,7 +37,7 @@
       delegate_to: localhost
       register: host_facts
 
-    # This executes when the specified action in "maintenance"
+    # This executes when the specified action is "maintenance"
     - block:
       - name: Enter Maintenance Mode
         vmware_maintenancemode:
@@ -53,7 +53,7 @@
       # other tasks here
       when: vcenter_esx_host_action == "maintenance"
 
-    # This executes when the specified action in "unmaintenance"
+    # This executes when the specified action is "unmaintenance"
     - block:
       - name: Exit Maintenance Mode
         vmware_maintenancemode:
@@ -68,7 +68,7 @@
       # other tasks here
       when: vcenter_esx_host_action == "unmaintenance"
     
-    # This executes when the specified action in "reboot"
+    # This executes when the specified action is "reboot"
     - block:
       - name: Reboot ESX host
         vmware_host_powerstate:
@@ -76,6 +76,7 @@
           username: "{{ vcenter_username }}"
           password: "{{ vcenter_password }}"
           esxi_hostname: "{{ inventory_hostname }}"
+          state: reboot-host
         delegate_to: localhost
       - name: Wait for ESX hosts to be available
         local_action:
@@ -87,4 +88,46 @@
           timeout: 3600
       # other tasks here
       when: vcenter_esx_host_action == "reboot"
+
+    # This executes when the specified action is "poweroff"
+    - block:
+      - name: Reboot ESX host
+        vmware_host_powerstate:
+          hostname: "{{ vcenter_hostname }}"
+          username: "{{ vcenter_username }}"
+          password: "{{ vcenter_password }}"
+          esxi_hostname: "{{ inventory_hostname }}"
+          state: power-down-to-standby
+        delegate_to: localhost
+      - name: Wait for ESX hosts to be available
+        local_action:
+          module: wait_for
+          host: "{{ inventory_hostname }}"
+          port: 22
+          state: started
+          sleep: 30
+          timeout: 3600
+      # other tasks here
+      when: vcenter_esx_host_action == "poweroff"
+
+    # This executes when the specified action is "powerup"
+    - block:
+      - name: Reboot ESX host
+        vmware_host_powerstate:
+          hostname: "{{ vcenter_hostname }}"
+          username: "{{ vcenter_username }}"
+          password: "{{ vcenter_password }}"
+          esxi_hostname: "{{ inventory_hostname }}"
+          state: power-up-from-standby
+        delegate_to: localhost
+      - name: Wait for ESX hosts to be available
+        local_action:
+          module: wait_for
+          host: "{{ inventory_hostname }}"
+          port: 22
+          state: started
+          sleep: 30
+          timeout: 3600
+      # other tasks here
+      when: vcenter_esx_host_action == "powerup"
 ...

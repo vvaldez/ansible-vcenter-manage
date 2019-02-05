@@ -10,16 +10,16 @@
     vcenter_username: "{{ vcenter_username }}"
     # Set vcenter password here, best practice is to provide this in an encrypted file via ansible-vault instead
     vcenter_password: "{{ vcenter_password }}"
-    # Set vcetner cluster here
 
   tasks:
-    # This executes when the specified action in "reboot"
+    # This executes when the specified action is "reboot"
     - name: Reboot ESX host
       vmware_host_powerstate:
         hostname: "{{ vcenter_hostname }}"
         username: "{{ vcenter_username }}"
         password: "{{ vcenter_password }}"
         esxi_hostname: "{{ inventory_hostname }}"
+        state: reboot-host
       delegate_to: localhost
     - name: Wait for ESX hosts to be available
       local_action:
@@ -29,5 +29,6 @@
         state: started
         sleep: 30
         timeout: 3600
+
     # other tasks here
 ...

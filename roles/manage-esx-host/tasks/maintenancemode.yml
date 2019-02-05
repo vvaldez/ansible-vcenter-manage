@@ -1,0 +1,16 @@
+---
+# This executes when the specified action
+- name: Manage maintenance mode for ESX host
+  vmware_maintenancemode:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    esxi_hostname: "{{ inventory_hostname }}"
+    vsan: ensureObjectAccessibility
+    evacuate: yes
+    timeout: 3600
+    state: "{{ esx_maintenancemode }}"
+  delegate_to: localhost
+
+# other tasks here
+...

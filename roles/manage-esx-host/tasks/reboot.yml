@@ -1,26 +1,8 @@
 ---
 # This executes when the specified action in "reboot"
-- name: Reboot ESX host
-  vmware_host_powerstate:
-    hostname: "{{ vcenter_hostname }}"
-    username: "{{ vcenter_username }}"
-    password: "{{ vcenter_password }}"
-    esxi_hostname: "{{ esx_hostname }}"
-  delegate_to: localhost
-  loop: "{{ vcenter_esx_hosts }}"
-  loop_control:
-    loop_var: esx_hostname
+- import_tasks: powerstate.yml
+  vars:
+    esx_power_state: "reboot-host"
 
-- name: Wait for ESX hosts to be available
-  local_action:
-    module: wait_for
-    host: "{{ esx_hostname }}"
-    port: 22
-    state: started
-    sleep: 30
-    timeout: 3600
-  loop: "{{ vcenter_esx_hosts }}"
-  loop_control:
-    loop_var: esx_hostname
-# other tasks here
+  # other tasks here
 ...

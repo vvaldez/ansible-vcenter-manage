@@ -1,0 +1,9 @@
+---
+# Sample playbook to handle multiple actions to ESX hosts via a role
+- name: Manage ESX Host based on specified state
+  hosts: esx-hosts
+  gather_facts: False
+  tasks:
+  - include_role:
+      name: manage-esx-host
+...

@@ -1,0 +1,33 @@
+---
+# Sample playbook to perform a single ESX host action of 'reboot'
+- name: Manage ESX Host based on specified state
+  hosts: esx-hosts
+  gather_facts: False
+  vars:
+    # Set vcenter hostname here
+    vcenter_hostname: "{{ vcenter_hostname }}" 
+    # Set vcenter username here
+    vcenter_username: "{{ vcenter_username }}"
+    # Set vcenter password here, best practice is to provide this in an encrypted file via ansible-vault instead
+    vcenter_password: "{{ vcenter_password }}"
+    # Set vcetner cluster here
+
+  tasks:
+    # This executes when the specified action in "reboot"
+    - name: Reboot ESX host
+      vmware_host_powerstate:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        esxi_hostname: "{{ inventory_hostname }}"
+      delegate_to: localhost
+    - name: Wait for ESX hosts to be available
+      local_action:
+        module: wait_for
+        host: "{{ inventory_hostname }}"
+        port: 22
+        state: started
+        sleep: 30
+        timeout: 3600
+    # other tasks here
+...

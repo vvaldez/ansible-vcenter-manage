@@ -1,0 +1,14 @@
+---
+# Set vcenter hostname here
+vcenter_hostname: "{{ vcenter_hostname }}" 
+# Set vcenter username here
+vcenter_username: "{{ vcenter_username }}"
+# Set vcenter password here, best practice is to provide this in an encrypted file via ansible-vault instead
+vcenter_password: "{{ vcenter_password }}"
+# Set vcetner cluster here
+vcenter_cluster: "{{ vcenter_cluster }}"
+# Set vcetner datacenter here
+vcenter_datacenter: "{{ vcenter_datacenter }}"
+# Set the action to perform on each host, one of: [maintenance,unmaintenance,reboot,poweroff,poweron]
+vcenter_esx_host_action: "{{ vcenter_esx_host_action }}"
+...

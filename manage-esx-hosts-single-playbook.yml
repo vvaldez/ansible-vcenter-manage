@@ -1,0 +1,90 @@
+---
+# Sample playbook to handle multiple actions to ESX hosts
+- name: Manage ESX Host based on specified state
+  hosts: esx-hosts
+  gather_facts: False
+  vars:
+    # Set vcenter hostname here
+    vcenter_hostname: "{{ vcenter_hostname }}" 
+    # Set vcenter username here
+    vcenter_username: "{{ vcenter_username }}"
+    # Set vcenter password here, best practice is to provide this in an encrypted file via ansible-vault instead
+    vcenter_password: "{{ vcenter_password }}"
+    # Set vcetner cluster here
+    vcenter_cluster: "{{ vcenter_cluster }}"
+    # Set vcetner datacenter here
+    vcenter_datacenter: "{{ vcenter_datacenter }}"
+    # Set the action to perform on each host, one of: [maintenance,unmaintenance,reboot,poweroff,poweron]
+    vcenter_esx_host_action: "{{ vcenter_esx_host_action }}"
+
+  tasks:
+    # Gather facts about the datacenter. From here a list of clusters and ESX hosts can be extracted
+    - name: Gather cluster facts from given datacenter
+      vmware_cluster_facts:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        datacenter: "{{ vcenter_datacenter }}"
+      delegate_to: localhost
+      register: cluster_facts
+
+    # Gather facts about every ESX host in a cluster (or all facts of a single host)
+    - name: Gather all ESX host facts
+      vmware_host_facts:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+      delegate_to: localhost
+      register: host_facts
+
+    # This executes when the specified action in "maintenance"
+    - block:
+      - name: Enter Maintenance Mode
+        vmware_maintenancemode:
+          hostname: "{{ vcenter_hostname }}"
+          username: "{{ vcenter_username }}"
+          password: "{{ vcenter_password }}"
+          esxi_hostname: "{{ inventory_hostname }}"
+          vsan: ensureObjectAccessibility
+          evacuate: yes
+          timeout: 3600
+          state: present
+        delegate_to: localhost
+      # other tasks here
+      when: vcenter_esx_host_action == "maintenance"
+
+    # This executes when the specified action in "unmaintenance"
+    - block:
+      - name: Exit Maintenance Mode
+        vmware_maintenancemode:
+          hostname: "{{ vcenter_hostname }}"
+          username: "{{ vcenter_username }}"
+          password: "{{ vcenter_password }}"
+          esxi_hostname: "{{ inventory_hostname }}"
+          vsan: ensureObjectAccessibility
+          timeout: 3600
+          state: absent
+        delegate_to: localhost
+      # other tasks here
+      when: vcenter_esx_host_action == "unmaintenance"
+    
+    # This executes when the specified action in "reboot"
+    - block:
+      - name: Reboot ESX host
+        vmware_host_powerstate:
+          hostname: "{{ vcenter_hostname }}"
+          username: "{{ vcenter_username }}"
+          password: "{{ vcenter_password }}"
+          esxi_hostname: "{{ inventory_hostname }}"
+        delegate_to: localhost
+      - name: Wait for ESX hosts to be available
+        local_action:
+          module: wait_for
+          host: "{{ inventory_hostname }}"
+          port: 22
+          state: started
+          sleep: 30
+          timeout: 3600
+      # other tasks here
+      when: vcenter_esx_host_action == "reboot"
+...

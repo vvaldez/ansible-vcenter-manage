@@ -1,0 +1,17 @@
+---
+# This executes when the specified action in "unmaintenance"
+- name: Exit Maintenance Mode
+  vmware_maintenancemode:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    esxi_hostname: "{{ esx_hostname }}"
+    vsan: ensureObjectAccessibility
+    timeout: 3600
+    state: absent
+  delegate_to: localhost
+  loop: "{{ vcenter_esx_hosts }}"
+  loop_control:
+    loop_var: esx_hostname
+# other tasks here
+...

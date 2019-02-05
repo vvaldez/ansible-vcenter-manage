@@ -1,0 +1,18 @@
+---
+- import_tasks: gather_vcenter_facts.yml
+
+- import_tasks: maintenance.yml
+  when: vcenter_esx_host_action == "maintenance"
+
+- import_tasks: unmaintenance.yml
+  when: vcenter_esx_host_action == "unmaintenance"
+
+- import_tasks: reboot.yml
+  when: vcenter_esx_host_action == "reboot"
+
+- import_tasks: poweroff.yml
+  when: vcenter_esx_host_action == "poweroff"
+
+- import_tasks: poweron.yml
+  when: vcenter_esx_host_action == "poweron"
+...

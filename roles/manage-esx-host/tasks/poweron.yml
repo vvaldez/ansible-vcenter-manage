@@ -1,0 +1,21 @@
+---
+# This executes when the specified action in "reboot"
+  - name: Reboot ESX host
+    vmware_host_powerstate:
+      hostname: "{{ vcenter_hostname }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      esxi_hostname: "{{ inventory_hostname }}"
+      state: power-up-from-standby
+    delegate_to: localhost
+
+  - name: Wait for ESX hosts to be available
+    local_action:
+      module: wait_for
+      host: "{{ inventory_hostname }}"
+      port: 22
+      state: started
+      sleep: 30
+      timeout: 3600
+  # other tasks here
+...

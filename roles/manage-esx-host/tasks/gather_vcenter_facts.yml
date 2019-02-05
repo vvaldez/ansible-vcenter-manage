@@ -1,0 +1,20 @@
+---
+# Gather facts about the datacenter. From here a list of clusters and ESX hosts can be extracted
+- name: Gather cluster facts from given datacenter
+  vmware_cluster_facts:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    datacenter: "{{ vcenter_datacenter }}"
+  delegate_to: localhost
+  register: cluster_facts
+
+# Gather facts about every ESX host in a cluster (or all facts of a single host)
+- name: Gather all ESX host facts
+  vmware_host_facts:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+  delegate_to: localhost
+  register: host_facts
+...

@@ -1,0 +1,136 @@
+---
+# Sample playbook to handle multiple actions to ESX hosts
+- name: VMware vCenter Ansible Demo
+  hosts: esx-hosts
+  gather_facts: False
+  vars:
+    # Set vcenter hostname here
+    vcenter_hostname: "{{ vcenter_hostname }}" 
+    # Set vcenter username here
+    vcenter_username: "{{ vcenter_username }}"
+    # Set vcenter password here, best practice is to provide this in an encrypted file via ansible-vault instead
+    vcenter_password: "{{ vcenter_password }}"
+    # Set vcetner datacenter here
+    vcenter_datacenter: "{{ vcenter_datacenter }}"
+    # Set the action to perform on each host, one of: [maintenance,unmaintenance,reboot,poweroff,poweron]
+    vcenter_esx_host_action: "demo"
+
+  tasks:
+    - block:
+      - pause:
+          prompt: "DEMO: connecting to '{{ vcenter_hostname }}' with username '{{ vcenter_username }}'"
+        when: demo is defined | default(False) | bool == True
+
+      - name: Gather vcenter facts from given datacenter
+        vmware_about_facts:
+          hostname: "{{ vcenter_hostname }}"
+          username: "{{ vcenter_username }}"
+          password: "{{ vcenter_password }}"
+          validate_certs: False
+        delegate_to: localhost
+        register: vcenter_facts
+
+      - pause:
+          prompt: "DEMO: vcenter facts collected, displaying all facts"
+        when: demo is defined | default(False) | bool == True
+
+      - debug:
+          var: vcenter_facts
+          verbosity: 1
+
+      - pause:
+          prompt: "DEMO: collect cluster facts from datacenter '{{ vcenter_datacenter }}'"
+        when: demo is defined | default(False) | bool == True
+
+      - name: Gather cluster facts from given datacenter
+        vmware_cluster_facts:
+          hostname: "{{ vcenter_hostname }}"
+          username: "{{ vcenter_username }}"
+          password: "{{ vcenter_password }}"
+          datacenter: "{{ vcenter_datacenter }}"
+          validate_certs: False
+        delegate_to: localhost
+        register: cluster_facts
+  
+      - name: Set cluster name fact
+        set_fact:
+          vcenter_cluster_name: "{{ item.key }}"
+        with_dict: "{{ cluster_facts.clusters }}"
+
+      - debug:
+          msg: "DEMO: cluster name found: '{{ vcenter_cluster_name }}'"
+          verbosity: 1
+
+      - pause:
+          prompt: "DEMO: show all cluster facts"
+        when: demo is defined | default(False) | bool == True
+
+      - debug:
+          var: cluster_facts
+          verbosity: 1
+
+      - pause:
+          prompt: "DEMO: collect datastore facts"
+        when: demo is defined | default(False) | bool == True
+
+      - name: Gather datastore facts from given datacenter
+        vmware_datastore_facts:
+          hostname: "{{ vcenter_hostname }}"
+          username: "{{ vcenter_username }}"
+          password: "{{ vcenter_password }}"
+          datacenter: "{{ vcenter_datacenter }}"
+          validate_certs: False
+        delegate_to: localhost
+        register: datastore_facts
+  
+      - pause:
+          prompt: "DEMO: show all datastore facts"
+        when: demo is defined | default(False) | bool == True
+
+      - debug:
+          var: datastore_facts
+          verbosity: 1
+
+      - pause:
+          prompt: "DEMO: collect vswitch facts"
+        when: demo is defined | default(False) | bool == True
+
+      - name: Gather vswitch facts from discovered cluster
+        vmware_vswitch_facts:
+          hostname: "{{ vcenter_hostname }}"
+          username: "{{ vcenter_username }}"
+          password: "{{ vcenter_password }}"
+          cluster_name: "{{ vcenter_cluster_name }}"
+          validate_certs: False
+        delegate_to: localhost
+        register: vswitch_facts
+  
+      - pause:
+          prompt: "DEMO: show vswitch facts"
+        when: demo is defined | default(False) | bool == True
+
+      - debug:
+          var: vswitch_facts
+          verbosity: 1
+
+      - pause:
+          prompt: "DEMO: collect esx host facts"
+        when: demo is defined | default(False) | bool == True
+
+      - name: Gather esx host facts from discovered cluster
+        vmware_host_facts:
+          hostname: "{{ vcenter_hostname }}"
+          username: "{{ vcenter_username }}"
+          password: "{{ vcenter_password }}"
+          validate_certs: False
+        delegate_to: localhost
+        register: esx_host_facts
+  
+      - pause:
+          prompt: "DEMO: show esx_host facts"
+        when: demo is defined | default(False) | bool == True
+
+      - debug:
+          var: esx_host_facts
+          verbosity: 1
+...
